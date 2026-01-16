@@ -21,9 +21,21 @@ class Food:
             cell_size,
             cell_size
         )
-        pygame.draw.rect(screen, DARK_GREEN, food_rect)
         screen.blit(food_surface, food_rect)
 
+class Snake:
+    def __init__(self):
+        self.body = [Vector2(6,9), Vector2(5,9), Vector2(4,9)]
+        self.direction = Vector2(1, 0)
+
+    def draw(self):
+        for segment in self.body:
+            segment_rect = (segment.x * cell_size, segment.y * cell_size, cell_size, cell_size)
+            pygame.draw.rect(screen, DARK_GREEN, segment_rect, 0, 7)
+
+    def update(self):
+        self.body = self.body[:-1]
+        self.body.insert(0, self.body[0] + self.direction)
 
 screen = pygame.display.set_mode((cell_size*number_of_cells, cell_size*number_of_cells))
 
@@ -33,21 +45,48 @@ pygame.display.set_caption("Retro Snake")
 clock = pygame.time.Clock()
 
 food = Food()
+snake = Snake()
 food_surface = pygame.image.load("graphics/food.png")
-# food_surface = pygame.transform.scale(food_surface, (30, 30))
+food_surface = pygame.transform.scale(food_surface,(30, 30))
+
+SNAKE_UPDATE = pygame.USEREVENT
+pygame.time.set_timer(SNAKE_UPDATE, 200)
 
 while True:
-    pressed_keys = pygame.key.get_pressed()
-
-
     for event in pygame.event.get():
+        if event.type == SNAKE_UPDATE:
+            snake.update()
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
 
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT and snake.direction != Vector2(1, 0):
+                print("a")
+                snake.direction = Vector2(-1, 0)
+
+            if event.key == pygame.K_DOWN and snake.direction != Vector2(0, -1):
+                print("s")
+                snake.direction = Vector2(0, 1)
+
+            if event.key == pygame.K_RIGHT and snake.direction != Vector2(-1, 0):
+                print("d")
+                snake.direction = Vector2(1, 0)
+
+            if event.key == pygame.K_UP and snake.direction != Vector2(0, 1):
+                print("w")
+                snake.direction = Vector2(0, -1)
+
+
+
     # Drawing
     screen.fill(GREEN)
     food.draw()
+    snake.draw()
+    
+
+    # Snake
+
 
     pygame.display.update()
     clock.tick(60)
